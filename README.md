@@ -8,7 +8,7 @@ virtualenv venv
 venv/bin/pip install -r requirements.txt
 venv/bin/python send.py
 # compile for windows
-cp .spec.template send.spec
-venv/bin/pyinstaller send.spec
-# check dist/send/ for executable file
+venv/bin/pyinstaller --name send.exe --onefile --add-data ".env;." send.py
+venv/bin/pyinstaller --name halt.exe --onefile --add-data ".env;." halt.py
+# check dist/ for executable file
 ```
