@@ -1,6 +1,6 @@
 # Device Activity Telegram Bot
 
-## Usage:
+## Usage
 
 ```sh
 cp .env.example .env
@@ -15,3 +15,6 @@ venv/bin/pyinstaller --name windows_service.exe --onefile --add-data ".env;." wi
 .\windows_service.exe --startup auto install
 net start DeviceActivityTelegramBot
 ```
+
+## Demo
+[![preview](https://img.youtube.com/vi/vWEMChJ3yJY/0.jpg)](https://youtube.com/shorts/vWEMChJ3yJY)
