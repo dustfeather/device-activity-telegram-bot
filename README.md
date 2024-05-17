@@ -19,8 +19,8 @@ venv/bin/python halt.py
 
 ## Telegram Usage
 ```sh
-/halt - sends a shutdown command to every machine that has halt.py running
-/halt DEVICENAME - sends a shutdown command to a specific machine
+/halt # sends a shutdown command to every machine that has halt.py running
+/halt DEVICENAME # sends a shutdown command to a specific machine
 ```
 
 ## Demo
