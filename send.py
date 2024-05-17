@@ -29,5 +29,5 @@ def send(message):
 if __name__ == "__main__":
     load_env()
     device_name = platform.node()  # Get the device name
-    message = f"Your PC '{device_name}' has been logged into."
+    message = f"Your device '{device_name}' has been logged into."
     send(message)
