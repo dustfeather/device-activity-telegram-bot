@@ -9,6 +9,6 @@ venv/bin/pip install -r requirements.txt
 venv/bin/python send.py
 # compile for windows
 cp .spec.template send.spec
-pyinstaller send.spec
-dist/send.exe
+venv/bin/pyinstaller send.spec
+# check dist/send/ for executable file
 ```
