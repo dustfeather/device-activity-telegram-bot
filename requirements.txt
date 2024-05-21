@@ -54,7 +54,7 @@ pywin32==306
 pywin32-ctypes==0.2.2
 pyzmq==26.0.3
 referencing==0.35.1
-requests==2.31.0
+requests==2.32.0
 rpds-py==0.18.1
 setuptools==69.5.1
 six==1.16.0
