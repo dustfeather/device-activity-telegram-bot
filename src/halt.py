@@ -1,4 +1,5 @@
 """Telegram bot for remote device shutdown."""
+
 import asyncio
 import logging
 import platform
@@ -15,8 +16,7 @@ from .telegram_client import send_message
 
 # Configure logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -27,9 +27,9 @@ os_name = platform.node()
 def shutdown_machine() -> None:
     """Shutdown the machine based on the operating system."""
     system = platform.system()
-    if system == 'Windows':
+    if system == "Windows":
         subprocess.run(["shutdown", "/s", "/f", "/t", "0"], check=False)
-    elif system in ('Linux', 'Darwin'):  # Darwin for macOS
+    elif system in ("Linux", "Darwin"):  # Darwin for macOS
         subprocess.run(["sudo", "shutdown", "now"], check=False)
     else:
         logger.warning(f"Unsupported operating system: {system}")
@@ -42,23 +42,25 @@ async def halt(update: Update, context: CallbackContext) -> None:
 
     args = context.args or []
     if len(args) == 0:
-        await update.message.reply_text('Shutting down all machines...')
+        await update.message.reply_text("Shutting down all machines...")
         shutdown_machine()
     elif len(args) == 1:
         device_name = args[0]
         # Sanitize device name to prevent injection attacks
         # Only allow alphanumeric, hyphen, underscore, and dot characters
-        if not re.match(r'^[a-zA-Z0-9._-]+$', device_name):
-            await update.message.reply_text('Invalid device name format.')
+        if not re.match(r"^[a-zA-Z0-9._-]+$", device_name):
+            await update.message.reply_text("Invalid device name format.")
             return
 
         if device_name == os_name:
-            await update.message.reply_text(f'Shutting down {device_name}...')
+            await update.message.reply_text(f"Shutting down {device_name}...")
             shutdown_machine()
         else:
-            await update.message.reply_text(f'Device name {device_name} does not match any machine.')
+            await update.message.reply_text(
+                f"Device name {device_name} does not match any machine."
+            )
     else:
-        await update.message.reply_text('Usage: /halt [DEVICENAME]')
+        await update.message.reply_text("Usage: /halt [DEVICENAME]")
 
 
 async def error_handler(update: Update, context: CallbackContext) -> None:
@@ -69,7 +71,7 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
     try:
         raise context.error
     except (TimedOut, httpcore.ConnectTimeout):
-        logger.warning('Request timed out. Retrying in 5 seconds...')
+        logger.warning("Request timed out. Retrying in 5 seconds...")
         await asyncio.sleep(5)
         if update:
             await halt(update, context)
@@ -97,6 +99,6 @@ async def startup_notification() -> None:
     await send_message(message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(startup_notification())
     main()

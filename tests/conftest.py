@@ -1,4 +1,5 @@
 """Pytest configuration and shared fixtures."""
+
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
@@ -10,19 +11,16 @@ from telegram.ext import CallbackContext
 def mock_env_vars(monkeypatch):
     """Mock environment variables for testing."""
     # Use valid Telegram bot token format: numeric:alphanumeric
-    monkeypatch.setenv('BOT_TOKEN', '123456789:ABCdefGHIjklMNOpqrsTUVwxyz')
-    monkeypatch.setenv('CHAT_ID', '67890')
-    return {
-        'BOT_TOKEN': '123456789:ABCdefGHIjklMNOpqrsTUVwxyz',
-        'CHAT_ID': '67890'
-    }
+    monkeypatch.setenv("BOT_TOKEN", "123456789:ABCdefGHIjklMNOpqrsTUVwxyz")
+    monkeypatch.setenv("CHAT_ID", "67890")
+    return {"BOT_TOKEN": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz", "CHAT_ID": "67890"}
 
 
 @pytest.fixture
 def mock_httpx_client(monkeypatch, mock_env_vars):
     """Mock httpx.AsyncClient for HTTP calls."""
     mock_response = Mock()
-    mock_response.json.return_value = {'ok': True, 'result': {'message_id': 1}}
+    mock_response.json.return_value = {"ok": True, "result": {"message_id": 1}}
     mock_response.raise_for_status = Mock()
 
     async def mock_post(*args, **kwargs):
@@ -34,23 +32,25 @@ def mock_httpx_client(monkeypatch, mock_env_vars):
     mock_client.__aexit__ = AsyncMock(return_value=False)
 
     # Patch httpx.AsyncClient
-    monkeypatch.setattr('httpx.AsyncClient', lambda *args, **kwargs: mock_client)
+    monkeypatch.setattr("httpx.AsyncClient", lambda *args, **kwargs: mock_client)
     return mock_client
 
 
 @pytest.fixture
 def mock_platform_node(monkeypatch):
     """Mock platform.node() to return a test device name."""
-    monkeypatch.setattr('platform.node', lambda: 'test-device')
+    monkeypatch.setattr("platform.node", lambda: "test-device")
     # Also patch halt.os_name directly
-    monkeypatch.setattr('src.halt.os_name', 'test-device')
+    monkeypatch.setattr("src.halt.os_name", "test-device")
 
 
 @pytest.fixture
 def mock_platform_system(monkeypatch):
     """Mock platform.system() to return a test OS."""
-    def _mock_system(os_name='Windows'):
-        monkeypatch.setattr('platform.system', lambda: os_name)
+
+    def _mock_system(os_name="Windows"):
+        monkeypatch.setattr("platform.system", lambda: os_name)
+
     return _mock_system
 
 
@@ -58,22 +58,16 @@ def mock_platform_system(monkeypatch):
 def mock_subprocess_run(monkeypatch):
     """Mock subprocess.run for shutdown commands."""
     mock_run = Mock()
-    monkeypatch.setattr('subprocess.run', mock_run)
+    monkeypatch.setattr("subprocess.run", mock_run)
     return mock_run
 
 
 @pytest.fixture
 def mock_telegram_update():
     """Create a mock Telegram Update object."""
-    user = User(id=12345, first_name='Test', is_bot=False, username='testuser')
-    chat = Chat(id=67890, type='private')
-    message = Message(
-        message_id=1,
-        date=None,
-        chat=chat,
-        from_user=user,
-        text='/halt'
-    )
+    user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
+    chat = Chat(id=67890, type="private")
+    message = Message(message_id=1, date=None, chat=chat, from_user=user, text="/halt")
     update = Update(update_id=1, message=message)
     # Note: Cannot set reply_text directly on frozen Message objects
     # Tests should use patch.object() to mock reply_text when needed
@@ -96,5 +90,5 @@ def mock_application_builder(monkeypatch):
     mock_builder = MagicMock()
     mock_builder.token.return_value = mock_builder
     mock_builder.build.return_value = mock_app
-    monkeypatch.setattr('telegram.ext.ApplicationBuilder', lambda: mock_builder)
+    monkeypatch.setattr("telegram.ext.ApplicationBuilder", lambda: mock_builder)
     return mock_app, mock_builder

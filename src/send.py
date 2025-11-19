@@ -1,4 +1,5 @@
 """Send Telegram notification on device login."""
+
 import asyncio
 import platform
 

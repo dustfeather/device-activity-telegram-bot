@@ -1,4 +1,5 @@
 """Unit tests for halt.py module."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpcore
@@ -13,7 +14,7 @@ class TestShutdownMachine:
 
     def test_shutdown_windows(self, mock_subprocess_run, mock_platform_system):
         """Test shutdown command on Windows."""
-        mock_platform_system('Windows')
+        mock_platform_system("Windows")
 
         halt.shutdown_machine()
 
@@ -23,7 +24,7 @@ class TestShutdownMachine:
 
     def test_shutdown_linux(self, mock_subprocess_run, mock_platform_system):
         """Test shutdown command on Linux."""
-        mock_platform_system('Linux')
+        mock_platform_system("Linux")
 
         halt.shutdown_machine()
 
@@ -33,7 +34,7 @@ class TestShutdownMachine:
 
     def test_shutdown_darwin(self, mock_subprocess_run, mock_platform_system):
         """Test shutdown command on macOS (Darwin)."""
-        mock_platform_system('Darwin')
+        mock_platform_system("Darwin")
 
         halt.shutdown_machine()
 
@@ -46,13 +47,14 @@ class TestHaltCommand:
     """Test cases for the halt() command handler."""
 
     @pytest.mark.asyncio
-    async def test_halt_no_args(self, mock_telegram_update, mock_telegram_context,
-                                 mock_subprocess_run, mock_platform_node):
+    async def test_halt_no_args(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
+    ):
         """Test /halt command with no arguments."""
         mock_telegram_context.args = []
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
             await halt.halt(mock_telegram_update, mock_telegram_context)
 
             # Verify reply was sent
@@ -64,13 +66,14 @@ class TestHaltCommand:
         assert mock_subprocess_run.called
 
     @pytest.mark.asyncio
-    async def test_halt_with_matching_device(self, mock_telegram_update, mock_telegram_context,
-                                             mock_subprocess_run, mock_platform_node):
+    async def test_halt_with_matching_device(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
+    ):
         """Test /halt command with matching device name."""
-        mock_telegram_context.args = ['test-device']
+        mock_telegram_context.args = ["test-device"]
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
             await halt.halt(mock_telegram_update, mock_telegram_context)
 
             # Verify reply was sent
@@ -82,13 +85,14 @@ class TestHaltCommand:
         assert mock_subprocess_run.called
 
     @pytest.mark.asyncio
-    async def test_halt_with_non_matching_device(self, mock_telegram_update, mock_telegram_context,
-                                                  mock_subprocess_run, mock_platform_node):
+    async def test_halt_with_non_matching_device(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
+    ):
         """Test /halt command with non-matching device name."""
-        mock_telegram_context.args = ['other-device']
+        mock_telegram_context.args = ["other-device"]
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
             await halt.halt(mock_telegram_update, mock_telegram_context)
 
             # Verify reply was sent
@@ -100,13 +104,14 @@ class TestHaltCommand:
         assert not mock_subprocess_run.called
 
     @pytest.mark.asyncio
-    async def test_halt_with_multiple_args(self, mock_telegram_update, mock_telegram_context,
-                                           mock_subprocess_run):
+    async def test_halt_with_multiple_args(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run
+    ):
         """Test /halt command with multiple arguments (invalid usage)."""
-        mock_telegram_context.args = ['arg1', 'arg2']
+        mock_telegram_context.args = ["arg1", "arg2"]
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
             await halt.halt(mock_telegram_update, mock_telegram_context)
 
             # Verify usage message was sent
@@ -122,15 +127,16 @@ class TestErrorHandler:
     """Test cases for the error_handler() function."""
 
     @pytest.mark.asyncio
-    async def test_error_handler_timed_out(self, mock_telegram_update, mock_telegram_context,
-                                           mock_subprocess_run, mock_platform_node):
+    async def test_error_handler_timed_out(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
+    ):
         """Test error handler with TimedOut exception."""
         mock_telegram_context.error = TimedOut("Connection timeout")
         mock_telegram_context.args = []
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
-            with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
+            with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
                 await halt.error_handler(mock_telegram_update, mock_telegram_context)
 
                 # Verify sleep was called
@@ -140,15 +146,16 @@ class TestErrorHandler:
                 assert mock_reply.called
 
     @pytest.mark.asyncio
-    async def test_error_handler_connect_timeout(self, mock_telegram_update, mock_telegram_context,
-                                                  mock_subprocess_run, mock_platform_node):
+    async def test_error_handler_connect_timeout(
+        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
+    ):
         """Test error handler with httpcore.ConnectTimeout exception."""
         mock_telegram_context.error = httpcore.ConnectTimeout("Connection timeout")
         mock_telegram_context.args = []
 
         # Mock reply_text at class level since Message objects are frozen
-        with patch('telegram.Message.reply_text', new_callable=AsyncMock) as mock_reply:
-            with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
+            with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
                 await halt.error_handler(mock_telegram_update, mock_telegram_context)
 
                 # Verify sleep was called
@@ -170,7 +177,7 @@ class TestErrorHandler:
 class TestMainFunction:
     """Test cases for the main() function."""
 
-    @patch('src.halt.ApplicationBuilder')
+    @patch("src.halt.ApplicationBuilder")
     def test_main_creates_application(self, mock_builder, mock_env_vars):
         """Test that main() creates and configures the application."""
         mock_app = MagicMock()
@@ -183,7 +190,7 @@ class TestMainFunction:
 
         # Verify ApplicationBuilder was called
         assert mock_builder.called
-        mock_builder_instance.token.assert_called_once_with(mock_env_vars['BOT_TOKEN'])
+        mock_builder_instance.token.assert_called_once_with(mock_env_vars["BOT_TOKEN"])
         mock_builder_instance.build.assert_called_once()
 
         # Verify handlers were added
@@ -193,7 +200,7 @@ class TestMainFunction:
         # Verify polling was started
         mock_app.run_polling.assert_called_once()
 
-    @patch('src.halt.ApplicationBuilder')
+    @patch("src.halt.ApplicationBuilder")
     def test_main_registers_handlers(self, mock_builder, mock_env_vars):
         """Test that main() registers the correct handlers."""
         mock_app = MagicMock()
