@@ -19,6 +19,7 @@ dev = [
     "pytest>=8.3.4",
     "pytest-asyncio>=0.24.0",
 ]
+# Platform-specific optional dependencies are handled via requirements-dev.txt
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

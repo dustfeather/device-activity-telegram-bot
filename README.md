@@ -9,7 +9,13 @@
 ```sh
 cp .env.example .env
 virtualenv venv
+
+# Install runtime dependencies (cross-platform)
 venv/bin/pip install -r requirements.txt
+
+# For development, install dev dependencies (handles platform-specific packages automatically)
+venv/bin/pip install -r requirements-dev.txt
+
 venv/bin/python send.py
 venv/bin/python halt.py
 ```
