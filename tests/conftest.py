@@ -11,11 +11,12 @@ from telegram.ext import CallbackContext
 @pytest.fixture
 def mock_env_vars(monkeypatch):
     """Mock environment variables for testing."""
-    monkeypatch.setenv('BOT_TOKEN', 'test_bot_token_12345')
-    monkeypatch.setenv('CHAT_ID', 'test_chat_id_67890')
+    # Use valid Telegram bot token format: numeric:alphanumeric
+    monkeypatch.setenv('BOT_TOKEN', '123456789:ABCdefGHIjklMNOpqrsTUVwxyz')
+    monkeypatch.setenv('CHAT_ID', '67890')
     return {
-        'BOT_TOKEN': 'test_bot_token_12345',
-        'CHAT_ID': 'test_chat_id_67890'
+        'BOT_TOKEN': '123456789:ABCdefGHIjklMNOpqrsTUVwxyz',
+        'CHAT_ID': '67890'
     }
 
 

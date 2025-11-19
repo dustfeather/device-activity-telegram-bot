@@ -10,6 +10,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext
 from dotenv import load_dotenv
 from telegram.error import TimedOut
 import httpcore
+from urllib.parse import quote
 
 # Configure logging
 logging.basicConfig(
@@ -32,8 +33,11 @@ if not bot_token:
     logger.error("No BOT_TOKEN found in environment variables.")
 else:
     # Mask token in logs to prevent log injection and token exposure
+    # Sanitize by removing any control characters that could be used for log injection
     masked_token = f"{bot_token[:4]}...{bot_token[-4:]}" if len(bot_token) > 8 else "****"
-    logger.info(f"Bot token loaded: {masked_token}")
+    # Remove control characters (newlines, carriage returns, etc.) to prevent log injection
+    masked_token = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', masked_token)
+    logger.info("Bot token loaded: %s", masked_token)
 
 # Get the OS name
 os_name = platform.node()
@@ -82,11 +86,23 @@ def send(message):
     if not token or not chat_id:
         raise ValueError("BOT_TOKEN and CHAT_ID must be set")
     
-    # Construct URL with validation - only allow Telegram API domain
-    telegram_api_base = "https://api.telegram.org"
-    url = f"{telegram_api_base}/bot{token}/sendMessage"
+    # Validate token format to prevent SSRF - Telegram bot tokens are numeric:alphanumeric
+    # Format: digits:alphanumeric (e.g., "123456789:ABCdefGHIjklMNOpqrsTUVwxyz")
+    if not re.match(r'^[0-9]+:[A-Za-z0-9_-]+$', token):
+        raise ValueError("Invalid BOT_TOKEN format")
     
-    # Validate URL starts with expected domain
+    # Validate chat_id is numeric or alphanumeric (can be negative for groups)
+    if not re.match(r'^-?[0-9]+$', str(chat_id)):
+        raise ValueError("Invalid CHAT_ID format")
+    
+    # Construct URL with proper encoding to prevent SSRF
+    telegram_api_base = "https://api.telegram.org"
+    # URL-encode the token to prevent injection of path separators or query parameters
+    # Preserve colon (:) as it's required in Telegram bot token format
+    encoded_token = quote(token, safe=':')
+    url = f"{telegram_api_base}/bot{encoded_token}/sendMessage"
+    
+    # Validate URL starts with expected domain (double-check after encoding)
     if not url.startswith(telegram_api_base):
         raise ValueError("Invalid URL constructed")
     
