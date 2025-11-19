@@ -26,5 +26,9 @@ Or add manually to `taskschd.msc`:
 /halt DEVICENAME # sends a shutdown command to a specific machine
 ```
 
+## Testing
+
+See `TESTING.md` for detailed test instructions, structure, and tips for running the suite locally.
+
 ## Demo
 [![preview](https://img.youtube.com/vi/vWEMChJ3yJY/0.jpg)](https://youtube.com/shorts/vWEMChJ3yJY)
