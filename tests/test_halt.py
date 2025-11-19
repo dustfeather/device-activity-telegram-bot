@@ -3,7 +3,7 @@ Unit tests for halt.py module.
 """
 import pytest
 import asyncio
-from unittest.mock import Mock, MagicMock, patch, call
+from unittest.mock import Mock, MagicMock, AsyncMock, patch, call
 import os
 import sys
 
@@ -127,7 +127,7 @@ class TestErrorHandler:
         mock_telegram_context.error = TimedOut("Connection timeout")
         mock_telegram_context.args = []
         
-        with patch('asyncio.sleep', new_callable=MagicMock) as mock_sleep:
+        with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
             await halt.error_handler(mock_telegram_update, mock_telegram_context)
             
             # Verify sleep was called
@@ -143,7 +143,7 @@ class TestErrorHandler:
         mock_telegram_context.error = httpcore.ConnectTimeout("Connection timeout")
         mock_telegram_context.args = []
         
-        with patch('asyncio.sleep', new_callable=MagicMock) as mock_sleep:
+        with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
             await halt.error_handler(mock_telegram_update, mock_telegram_context)
             
             # Verify sleep was called

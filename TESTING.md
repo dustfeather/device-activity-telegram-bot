@@ -39,4 +39,3 @@ venv/bin/pytest --cov=. --cov-report=html
 - Use `pytest -k "<keyword>"` to focus on specific scenarios.
 - Combine `-k` with `-vv` for more granular logging when debugging failures.
 - The coverage HTML output is written to `htmlcov/index.html`.
-

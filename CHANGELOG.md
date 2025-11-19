@@ -28,4 +28,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Device name matching for targeted shutdown commands
 - Error handling with automatic retry for timeout errors
 - Startup notification when halt monitor begins
-

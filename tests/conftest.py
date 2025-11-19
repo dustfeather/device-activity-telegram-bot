@@ -3,7 +3,7 @@ Pytest configuration and shared fixtures.
 """
 import os
 import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from telegram import Update, Message, Chat, User
 from telegram.ext import CallbackContext
 
@@ -64,6 +64,8 @@ def mock_telegram_update():
         text='/halt'
     )
     update = Update(update_id=1, message=message)
+    # Mock reply_text as AsyncMock to allow checking .called attribute
+    update.message.reply_text = AsyncMock()
     return update
 
 
