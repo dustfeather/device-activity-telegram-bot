@@ -32,7 +32,14 @@ def mock_requests_post(monkeypatch):
 @pytest.fixture
 def mock_platform_node(monkeypatch):
     """Mock platform.node() to return a test device name."""
+    # Patch both platform.node and halt.os_name since os_name is set at module load time
     monkeypatch.setattr('platform.node', lambda: 'test-device')
+    # Also patch halt.os_name directly in case the module was already loaded
+    try:
+        import halt
+        monkeypatch.setattr('halt.os_name', 'test-device')
+    except ImportError:
+        pass
 
 
 @pytest.fixture
@@ -64,8 +71,8 @@ def mock_telegram_update():
         text='/halt'
     )
     update = Update(update_id=1, message=message)
-    # Mock reply_text as AsyncMock to allow checking .called attribute
-    update.message.reply_text = AsyncMock()
+    # Note: Cannot set reply_text directly on frozen Message objects
+    # Tests should use patch.object() to mock reply_text when needed
     return update
 
 
