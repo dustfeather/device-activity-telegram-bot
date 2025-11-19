@@ -33,13 +33,17 @@ if not bot_token:
     logger.error("No BOT_TOKEN found in environment variables.")
 else:
     # Mask token in logs to prevent log injection and token exposure
-    # Sanitize token first by removing any control characters that could be used for log injection
-    sanitized_token = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', bot_token)
-    # Further remove risky newline and separator characters to prevent log injection
-    sanitized_token = re.sub(r'[\r\n\u2028\u2029]+', '', sanitized_token)
-    # Create masked version from sanitized token
+    # Define a strict sanitizer for logging user-derived values
+    def sanitize_for_log(s):
+        if not s:
+            return ''
+        # Remove all control characters, newlines, carriage returns, Unicode separators
+        # (matches ASCII control chars, \n, \r, Unicode line/paragraph separators)
+        return re.sub(r'[\x00-\x1f\x7f-\x9f\r\n\u2028\u2029]', '', s)
+    sanitized_token = sanitize_for_log(bot_token)
+    # Create masked version from sanitized token, ensuring segments are sanitized
     if len(sanitized_token) > 8:
-        masked_token = f"{sanitized_token[:4]}...{sanitized_token[-4:]}"
+        masked_token = f"{sanitize_for_log(sanitized_token[:4])}...{sanitize_for_log(sanitized_token[-4:])}"
     else:
         masked_token = "****"
     # Use %s placeholder to prevent any remaining injection risks
