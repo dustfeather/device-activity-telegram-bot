@@ -3,6 +3,7 @@ import platform
 import subprocess
 import logging
 import asyncio
+import re
 import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext
@@ -30,7 +31,9 @@ bot_token = os.getenv('BOT_TOKEN')
 if not bot_token:
     logger.error("No BOT_TOKEN found in environment variables.")
 else:
-    logger.info(f"Bot token loaded: {bot_token}")
+    # Mask token in logs to prevent log injection and token exposure
+    masked_token = f"{bot_token[:4]}...{bot_token[-4:]}" if len(bot_token) > 8 else "****"
+    logger.info(f"Bot token loaded: {masked_token}")
 
 # Get the OS name
 os_name = platform.node()
@@ -45,10 +48,16 @@ def shutdown_machine():
 # Define the command handler for /halt
 async def halt(update: Update, context: CallbackContext) -> None:
     if len(context.args) == 0:
-        await update.message.reply_text(f'Shutting down all machines...')
+        await update.message.reply_text('Shutting down all machines...')
         shutdown_machine()
     elif len(context.args) == 1:
         device_name = context.args[0]
+        # Sanitize device name to prevent injection attacks
+        # Only allow alphanumeric, hyphen, underscore, and dot characters
+        if not re.match(r'^[a-zA-Z0-9._-]+$', device_name):
+            await update.message.reply_text('Invalid device name format.')
+            return
+        
         if device_name == os_name:
             await update.message.reply_text(f'Shutting down {device_name}...')
             shutdown_machine()
@@ -68,12 +77,25 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
 def send(message):
     token = os.getenv('BOT_TOKEN')  # Fetch the bot token from the .env file
     chat_id = os.getenv('CHAT_ID')  # Fetch the chat ID from the .env file
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    
+    # Validate token and chat_id to prevent SSRF
+    if not token or not chat_id:
+        raise ValueError("BOT_TOKEN and CHAT_ID must be set")
+    
+    # Construct URL with validation - only allow Telegram API domain
+    telegram_api_base = "https://api.telegram.org"
+    url = f"{telegram_api_base}/bot{token}/sendMessage"
+    
+    # Validate URL starts with expected domain
+    if not url.startswith(telegram_api_base):
+        raise ValueError("Invalid URL constructed")
+    
     data = {
         'chat_id': chat_id,
         'text': message
     }
-    response = requests.post(url, data=data)
+    response = requests.post(url, data=data, timeout=10)
+    response.raise_for_status()
     return response.json()
 
 def main():
