@@ -172,8 +172,9 @@ Fixes #123
 
 ```
 device-activity-telegram-bot/
-├── halt.py              # Main bot application
-├── send.py              # Send notification script
+├── src/
+│   ├── halt.py          # Main bot application
+│   └── send.py          # Send notification script
 ├── requirements.txt     # Runtime dependencies
 ├── requirements-dev.txt # Development dependencies
 ├── tests/              # Test suite

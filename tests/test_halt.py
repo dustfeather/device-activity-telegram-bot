@@ -7,8 +7,9 @@ from unittest.mock import Mock, MagicMock, AsyncMock, patch, call
 import os
 import sys
 
-# Add parent directory to path to import halt module
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path to import halt module
+src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
+sys.path.insert(0, src_path)
 
 import halt
 from telegram.error import TimedOut

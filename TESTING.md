@@ -21,6 +21,8 @@ venv/bin/pytest -v
 # Target a specific module
 venv/bin/pytest tests/test_send.py
 venv/bin/pytest tests/test_halt.py
+
+Note: The project uses a `src/` layout, so the source files are located in `src/halt.py` and `src/send.py`.
 venv/bin/pytest tests/test_e2e.py
 
 # Generate a coverage report

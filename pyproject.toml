@@ -21,6 +21,10 @@ dev = [
 ]
 # Platform-specific optional dependencies are handled via requirements-dev.txt
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["halt", "send"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

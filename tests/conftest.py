@@ -37,6 +37,11 @@ def mock_platform_node(monkeypatch):
     monkeypatch.setattr('platform.node', lambda: 'test-device')
     # Also patch halt.os_name directly in case the module was already loaded
     try:
+        import sys
+        import os
+        src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
         import halt
         monkeypatch.setattr('halt.os_name', 'test-device')
     except ImportError:

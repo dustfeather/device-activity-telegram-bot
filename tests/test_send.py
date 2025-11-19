@@ -7,8 +7,9 @@ import os
 import sys
 import platform
 
-# Add parent directory to path to import send module
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path to import send module
+src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
+sys.path.insert(0, src_path)
 
 import send
 

@@ -16,15 +16,15 @@ venv/bin/pip install -r requirements.txt
 # For development, install dev dependencies (handles platform-specific packages automatically)
 venv/bin/pip install -r requirements-dev.txt
 
-venv/bin/python send.py
-venv/bin/python halt.py
+venv/bin/python src/send.py
+venv/bin/python src/halt.py
 ```
 Or add manually to `taskschd.msc`:
 
 ![taskschd.msc screenshot](https://github.com/dustfeather/device-activity-telegram-bot/blob/main/taskschd.msc.png?raw=true)
 
-* send.py - should be triggered on every login / screen unlock and sends a notification that someone logged into your device
-* halt.py - should be triggered on every screen lock and listens for remote shutdown commands
+* `src/send.py` - should be triggered on every login / screen unlock and sends a notification that someone logged into your device
+* `src/halt.py` - should be triggered on every screen lock and listens for remote shutdown commands
 
 ## Telegram Usage
 ```sh
