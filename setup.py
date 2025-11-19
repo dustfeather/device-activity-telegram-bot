@@ -5,8 +5,4 @@ The project is primarily configured via pyproject.toml.
 """
 from setuptools import setup
 
-setup(
-    py_modules=["halt", "send"],
-    packages=[],
-    package_dir={"": "src"},
-)
+setup()

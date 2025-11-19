@@ -1,11 +1,9 @@
-"""
-Pytest configuration and shared fixtures.
-"""
-import os
+"""Pytest configuration and shared fixtures."""
 import pytest
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock
 from telegram import Update, Message, Chat, User
 from telegram.ext import CallbackContext
+import httpx
 
 
 @pytest.fixture
@@ -21,31 +19,32 @@ def mock_env_vars(monkeypatch):
 
 
 @pytest.fixture
-def mock_requests_post(monkeypatch):
-    """Mock requests.post for HTTP calls."""
+def mock_httpx_client(monkeypatch, mock_env_vars):
+    """Mock httpx.AsyncClient for HTTP calls."""
     mock_response = Mock()
     mock_response.json.return_value = {'ok': True, 'result': {'message_id': 1}}
-    mock_post = Mock(return_value=mock_response)
-    monkeypatch.setattr('requests.post', mock_post)
-    return mock_post
+    mock_response.raise_for_status = Mock()
+    
+    async def mock_post(*args, **kwargs):
+        return mock_response
+    
+    mock_client = MagicMock()
+    mock_client.post = AsyncMock(side_effect=mock_post)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    
+    # Patch httpx.AsyncClient
+    monkeypatch.setattr('httpx.AsyncClient', lambda *args, **kwargs: mock_client)
+    return mock_client
 
 
 @pytest.fixture
 def mock_platform_node(monkeypatch):
     """Mock platform.node() to return a test device name."""
-    # Patch both platform.node and halt.os_name since os_name is set at module load time
     monkeypatch.setattr('platform.node', lambda: 'test-device')
-    # Also patch halt.os_name directly in case the module was already loaded
-    try:
-        import sys
-        import os
-        src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
-        if src_path not in sys.path:
-            sys.path.insert(0, src_path)
-        import halt
-        monkeypatch.setattr('halt.os_name', 'test-device')
-    except ImportError:
-        pass
+    # Also patch halt.os_name directly
+    from src import halt
+    monkeypatch.setattr('src.halt.os_name', 'test-device')
 
 
 @pytest.fixture
@@ -100,4 +99,3 @@ def mock_application_builder(monkeypatch):
     mock_builder.build.return_value = mock_app
     monkeypatch.setattr('telegram.ext.ApplicationBuilder', lambda: mock_builder)
     return mock_app, mock_builder
-
