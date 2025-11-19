@@ -7,7 +7,7 @@ name = "device-activity-telegram-bot"
 version = "1.0.0"
 description = "Telegram bot for device activity monitoring and remote shutdown"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32.3",
     "python-telegram-bot>=21.6",
