@@ -35,6 +35,8 @@ else:
     # Mask token in logs to prevent log injection and token exposure
     # Sanitize token first by removing any control characters that could be used for log injection
     sanitized_token = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', bot_token)
+    # Further remove risky newline and separator characters to prevent log injection
+    sanitized_token = re.sub(r'[\r\n\u2028\u2029]+', '', sanitized_token)
     # Create masked version from sanitized token
     if len(sanitized_token) > 8:
         masked_token = f"{sanitized_token[:4]}...{sanitized_token[-4:]}"
