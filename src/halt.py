@@ -39,7 +39,7 @@ async def halt(update: Update, context: CallbackContext) -> None:
     """Handle the /halt command."""
     if not update.message:
         return
-    
+
     args = context.args or []
     if len(args) == 0:
         await update.message.reply_text('Shutting down all machines...')
@@ -51,7 +51,7 @@ async def halt(update: Update, context: CallbackContext) -> None:
         if not re.match(r'^[a-zA-Z0-9._-]+$', device_name):
             await update.message.reply_text('Invalid device name format.')
             return
-        
+
         if device_name == os_name:
             await update.message.reply_text(f'Shutting down {device_name}...')
             shutdown_machine()
@@ -65,7 +65,7 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
     """Handle errors in the bot."""
     if not context.error:
         return
-    
+
     try:
         raise context.error
     except (TimedOut, httpcore.ConnectTimeout):

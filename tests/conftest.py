@@ -1,9 +1,9 @@
 """Pytest configuration and shared fixtures."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock
-from telegram import Update, Message, Chat, User
+
+import pytest
+from telegram import Chat, Message, Update, User
 from telegram.ext import CallbackContext
-import httpx
 
 
 @pytest.fixture
@@ -24,15 +24,15 @@ def mock_httpx_client(monkeypatch, mock_env_vars):
     mock_response = Mock()
     mock_response.json.return_value = {'ok': True, 'result': {'message_id': 1}}
     mock_response.raise_for_status = Mock()
-    
+
     async def mock_post(*args, **kwargs):
         return mock_response
-    
+
     mock_client = MagicMock()
     mock_client.post = AsyncMock(side_effect=mock_post)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=False)
-    
+
     # Patch httpx.AsyncClient
     monkeypatch.setattr('httpx.AsyncClient', lambda *args, **kwargs: mock_client)
     return mock_client
@@ -43,7 +43,6 @@ def mock_platform_node(monkeypatch):
     """Mock platform.node() to return a test device name."""
     monkeypatch.setattr('platform.node', lambda: 'test-device')
     # Also patch halt.os_name directly
-    from src import halt
     monkeypatch.setattr('src.halt.os_name', 'test-device')
 
 

@@ -5,16 +5,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
-    
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',
         case_sensitive=False,
     )
-    
+
     bot_token: str = Field(..., description="Telegram bot token")
     chat_id: str = Field(..., description="Telegram chat ID")
-    
+
     @field_validator('bot_token')
     @classmethod
     def validate_bot_token(cls, v: str) -> str:
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         if not re.match(r'^[0-9]+:[A-Za-z0-9_-]+$', v):
             raise ValueError("Invalid BOT_TOKEN format")
         return v
-    
+
     @field_validator('chat_id')
     @classmethod
     def validate_chat_id(cls, v: str) -> str:
