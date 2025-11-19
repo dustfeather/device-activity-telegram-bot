@@ -33,10 +33,14 @@ if not bot_token:
     logger.error("No BOT_TOKEN found in environment variables.")
 else:
     # Mask token in logs to prevent log injection and token exposure
-    # Sanitize by removing any control characters that could be used for log injection
-    masked_token = f"{bot_token[:4]}...{bot_token[-4:]}" if len(bot_token) > 8 else "****"
-    # Remove control characters (newlines, carriage returns, etc.) to prevent log injection
-    masked_token = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', masked_token)
+    # Sanitize token first by removing any control characters that could be used for log injection
+    sanitized_token = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', bot_token)
+    # Create masked version from sanitized token
+    if len(sanitized_token) > 8:
+        masked_token = f"{sanitized_token[:4]}...{sanitized_token[-4:]}"
+    else:
+        masked_token = "****"
+    # Use %s placeholder to prevent any remaining injection risks
     logger.info("Bot token loaded: %s", masked_token)
 
 # Get the OS name
