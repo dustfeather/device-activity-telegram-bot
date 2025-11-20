@@ -11,9 +11,28 @@ from telegram.ext import CallbackContext
 def mock_env_vars(monkeypatch):
     """Mock environment variables for testing."""
     # Use valid Telegram bot token format: numeric:alphanumeric
-    monkeypatch.setenv("BOT_TOKEN", "123456789:ABCdefGHIjklMNOpqrsTUVwxyz")
-    monkeypatch.setenv("CHAT_ID", "67890")
-    return {"BOT_TOKEN": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz", "CHAT_ID": "67890"}
+    bot_token = "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+    chat_id = "67890"
+    monkeypatch.setenv("BOT_TOKEN", bot_token)
+    monkeypatch.setenv("CHAT_ID", chat_id)
+    return {"BOT_TOKEN": bot_token, "CHAT_ID": chat_id}
+
+
+@pytest.fixture
+def mock_settings(monkeypatch, mock_env_vars):
+    """Mock the settings object in all modules that use it."""
+    from unittest.mock import MagicMock
+
+    mock_settings_obj = MagicMock()
+    mock_settings_obj.bot_token = mock_env_vars["BOT_TOKEN"]
+    mock_settings_obj.chat_id = mock_env_vars["CHAT_ID"]
+
+    # Patch settings in all modules that import it
+    monkeypatch.setattr("src.config.settings", mock_settings_obj)
+    monkeypatch.setattr("src.halt.settings", mock_settings_obj)
+    monkeypatch.setattr("src.telegram_client.settings", mock_settings_obj)
+
+    return mock_settings_obj
 
 
 @pytest.fixture

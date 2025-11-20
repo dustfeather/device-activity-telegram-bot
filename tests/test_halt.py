@@ -178,7 +178,7 @@ class TestMainFunction:
     """Test cases for the main() function."""
 
     @patch("src.halt.ApplicationBuilder")
-    def test_main_creates_application(self, mock_builder, mock_env_vars):
+    def test_main_creates_application(self, mock_builder, mock_env_vars, mock_settings):
         """Test that main() creates and configures the application."""
         mock_app = MagicMock()
         mock_builder_instance = MagicMock()
