@@ -12,9 +12,7 @@ class TestSendMessage:
     """Test cases for the send_message() function."""
 
     @pytest.mark.asyncio
-    async def test_send_message_success(
-        self, mock_env_vars, mock_httpx_client, mock_settings
-    ):
+    async def test_send_message_success(self, mock_env_vars, mock_httpx_client, mock_settings):
         """Test successful message sending."""
         message = "Test message"
         result = await send_message(message)

@@ -102,9 +102,7 @@ class TestE2EHaltFlow:
         assert not mock_subprocess_run.called
 
     @pytest.mark.asyncio
-    async def test_e2e_application_setup(
-        self, mock_env_vars, mock_httpx_client, mock_settings
-    ):
+    async def test_e2e_application_setup(self, mock_env_vars, mock_httpx_client, mock_settings):
         """Test e2e application setup and configuration."""
         with patch("src.halt.ApplicationBuilder") as mock_builder_class:
             mock_app = MagicMock(spec=Application)
