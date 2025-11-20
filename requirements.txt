@@ -1,4 +1,4 @@
-﻿# Core runtime dependencies (cross-platform)
+# Core runtime dependencies (cross-platform)
 httpx>=0.27.0
 python-telegram-bot>=21.6
 pydantic-settings>=2.5.0
