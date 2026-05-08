@@ -12,7 +12,7 @@ mypy>=1.11.0
 # Development tools
 ipython>=8.12.3
 jupyter>=1.1.1
-nbconvert>=7.16.4
+nbconvert>=7.17.1
 
 # Build tools
 pyinstaller>=6.11.0
