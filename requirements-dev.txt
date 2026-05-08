@@ -10,7 +10,7 @@ ruff>=0.6.0,<0.16
 mypy>=1.11.0
 
 # Development tools
-ipython>=8.12.3
+ipython>=9.13.0
 jupyter>=1.1.1
 nbconvert>=7.17.1
 
