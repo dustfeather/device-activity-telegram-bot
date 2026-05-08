@@ -1,13 +1,25 @@
 version: 2
 updates:
-  # Enable version updates for pip dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
-  
-  # Enable version updates for GitHub Actions
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      python-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "chore(deps)"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: ["dependencies", "github-actions"]
+    commit-message:
+      prefix: "chore(ci)"
