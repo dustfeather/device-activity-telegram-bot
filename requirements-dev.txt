@@ -16,7 +16,7 @@ nbconvert>=7.16.4
 
 # Build tools
 pyinstaller>=6.11.0
-pyinstaller-hooks-contrib>=2024.9
+pyinstaller-hooks-contrib>=2026.5
 
 # Windows-specific development dependencies
 # These are only installed on Windows
