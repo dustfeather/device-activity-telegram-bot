@@ -18,3 +18,5 @@ jobs:
     permissions:
       contents: read
     uses: dustfeather/shared-workflows/.github/workflows/python-test.yml@v1
+    with:
+      run-mypy: true
