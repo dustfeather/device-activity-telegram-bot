@@ -1,0 +1,38 @@
+name: PR checks
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main]
+    # Push triggers tests but not review (review only on PR). The push
+    # trigger preserves the repo's prior behavior of running tests on
+    # main pushes too.
+    paths-ignore:
+      - '.github/workflows/pr-checks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    permissions:
+      contents: read
+    uses: dustfeather/shared-workflows/.github/workflows/python-test.yml@v1
+    with:
+      run-mypy: true
+
+  review:
+    if: github.event_name == 'pull_request'
+    needs: tests
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+    uses: dustfeather/shared-workflows/.github/workflows/claude-code-review.yml@v1
+    secrets: inherit
