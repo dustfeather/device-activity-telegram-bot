@@ -2,7 +2,7 @@ name: PR checks
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
   push:
     branches: [main]
     # Push triggers tests but not review (review only on PR). The push
@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   tests:
+    if: github.event.action != 'closed'
     permissions:
       contents: read
     uses: dustfeather/shared-workflows/.github/workflows/python-test.yml@v1
