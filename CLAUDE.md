@@ -1,34 +1,23 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Architecture
 
-Two standalone scripts wired to OS task schedulers (Windows `taskschd.msc`, cron):
+Two scripts wired to OS schedulers (Windows `taskschd.msc`, cron):
+- `src/send.py` — one-shot: login/unlock notification, exits.
+- `src/halt.py` — long-running: startup notification, then `run_polling()` for `/halt [DEVICENAME]` → shut down host.
 
-- `src/send.py` — one-shot: on login/unlock, sends a notification, exits.
-- `src/halt.py` — long-running: sends a startup notification, then `run_polling()`
-  listens for `/halt [DEVICENAME]` and shuts down the host.
+Different Telegram layers: `halt.py` uses `python-telegram-bot` `Application` for inbound; ALL outbound goes through raw httpx `send_message()` in `telegram_client.py`.
 
-`halt.py` and `send.py` use different Telegram layers: `halt.py` uses the
-`python-telegram-bot` `Application` for *inbound* commands; all *outbound*
-notifications go through the raw httpx `send_message()` in `telegram_client.py`.
+`src/config.py`: `settings` is lazy `_SettingsProxy` — pydantic `Settings` built on first attr access. Under pytest falls back to `MagicMock` if env validation fails → tests MUST mock settings before use.
 
-`src/config.py`: `settings` is a lazy `_SettingsProxy` — the pydantic `Settings`
-object is constructed only on first attribute access. Under pytest it falls back
-to a `MagicMock` if env validation fails, so tests must mock settings before use.
+## Invariants — preserve
 
-## Invariants — preserve when editing
-
-- `bot_token` / `chat_id` are regex-validated in BOTH `config.py` and
-  `telegram_client.py` (SSRF defense; token is interpolated into the API URL) —
-  keep both in sync.
-- `halt()` regex-checks `DEVICENAME` and shuts down only when it matches
-  `platform.node()` (command-injection / wrong-host defense).
+- `bot_token`/`chat_id` regex-validated in BOTH `config.py` AND `telegram_client.py` (SSRF defense; token interpolated into API URL). Keep both in sync.
+- `halt()` regex-checks `DEVICENAME`, shuts down only when matches `platform.node()` (command-injection / wrong-host defense).
 
 ## Conventions
 
-- Python 3.14+; `src/` layout — run scripts as modules (`python -m src.send`).
+- Python 3.14+; `src/` layout — run as modules (`python -m src.send`).
 - Config from `.env`: `BOT_TOKEN`, `CHAT_ID`.
-- mypy is strict (typed defs required); ruff line-length 100.
-- Repo is rebase-merge only.
+- mypy strict; ruff line-length 100.
+- Rebase-merge only.
