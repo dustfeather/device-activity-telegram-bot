@@ -162,3 +162,5 @@ cython_debug/
 Scripts/
 pyvenv.cfg
 share/
+# Added by code-review-graph
+.code-review-graph/
