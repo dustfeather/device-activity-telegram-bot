@@ -1,6 +1,6 @@
 # Windows-specific runtime dependencies
 # This file is for reference only - use requirements-dev.txt which handles platform detection
 -r requirements.txt
-pywin32>=311
+pywin32>=312
 pywin32-ctypes>=0.2.3
 
