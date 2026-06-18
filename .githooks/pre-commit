@@ -1,0 +1,13 @@
+#!/bin/sh
+# Pre-commit gate: ruff lint + pytest. Mirrors CI
+# (shared-workflows python-test.yml).
+#
+# NOTE: `ruff format --check` is intentionally NOT run here. Some
+# pre-existing files (setup.py, src/halt.py) are not ruff-formatted, so a
+# format gate would block all commits on unrelated legacy code. Re-add the
+# `ruff format --check .` line once the tree is fully formatted.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+echo "[pre-commit] ruff check…"; python -m ruff check .
+echo "[pre-commit] pytest…";     python -m pytest -q
+echo "[pre-commit] OK"
