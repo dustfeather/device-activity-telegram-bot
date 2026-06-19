@@ -15,7 +15,7 @@ jupyter>=1.1.1
 nbconvert>=7.17.1
 
 # Build tools
-pyinstaller>=6.20.0
+pyinstaller>=6.21.0
 pyinstaller-hooks-contrib>=2026.6
 
 # Windows-specific development dependencies
