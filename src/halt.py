@@ -70,7 +70,7 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
 
     try:
         raise context.error
-    except (TimedOut, httpcore.ConnectTimeout):
+    except TimedOut, httpcore.ConnectTimeout:
         logger.warning("Request timed out. Retrying in 5 seconds...")
         await asyncio.sleep(5)
         if update:
