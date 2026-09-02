@@ -1,5 +1,7 @@
 # Device Activity Telegram Bot
 
+[![Checks](https://github.com/dustfeather/device-activity-telegram-bot/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/dustfeather/device-activity-telegram-bot/actions/workflows/pr-checks.yml)
+
 ## Requirements
 
 * Python 3.14 or higher
