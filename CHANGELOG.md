@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Security
+- `/halt` now rejects commands from users outside an allowlist ([#56](https://github.com/dustfeather/device-activity-telegram-bot/issues/56)). Previously the command handler was registered with no sender filter, so any Telegram user who found the bot could shut down the host — `/halt` with no arguments powers off immediately. The check runs before argument parsing and is applied in two places: a `filters.User` filter on the handler, and inside `halt()` itself, because `error_handler` re-invokes `halt()` directly on a timeout retry and would otherwise bypass the filter.
+
+### Added
+- `ALLOWED_USER_IDS` setting (optional, comma-separated Telegram user IDs). When unset it defaults to `CHAT_ID`, which in a private chat is the owner's own user ID — existing single-user deployments need no configuration change.
+- `tests/test_config.py` covering allowlist resolution and validation.
+- Tests asserting an unauthorized sender cannot shut down the host, including via the `error_handler` retry path.
+
+### Changed
+- Startup now fails with a clear error when `CHAT_ID` is negative (a group or channel) and `ALLOWED_USER_IDS` is unset, rather than defaulting to a value that would authorize every member of the group.
+
 ## [2025-11-19]
 
 ### Added

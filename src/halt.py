@@ -9,7 +9,7 @@ import subprocess
 import httpcore
 from telegram import Update
 from telegram.error import TimedOut
-from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler
+from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, filters
 
 from .config import settings
 from .telegram_client import send_message
@@ -35,9 +35,26 @@ def shutdown_machine() -> None:
         logger.warning(f"Unsupported operating system: {system}")
 
 
+def _allowed_user_ids() -> set[int]:
+    """User IDs permitted to issue commands."""
+    ids: set[int] = settings.authorized_user_ids
+    return ids
+
+
 async def halt(update: Update, context: CallbackContext) -> None:
     """Handle the /halt command."""
     if not update.message:
+        return
+
+    # Authorize the sender. The handler is also registered behind a filters.User
+    # filter, but error_handler re-invokes halt() directly on a timeout retry,
+    # which bypasses handler-level filters entirely — so the check lives here too.
+    user = update.effective_user
+    if user is None or user.id not in _allowed_user_ids():
+        logger.warning(
+            "Rejected /halt from unauthorized user id=%s",
+            user.id if user else None,
+        )
         return
 
     args = context.args or []
@@ -82,8 +99,10 @@ def main() -> None:
     # Create the Application using ApplicationBuilder
     application = ApplicationBuilder().token(settings.bot_token).build()
 
-    # Register the /halt command handler
-    application.add_handler(CommandHandler("halt", halt))
+    # Register the /halt command handler, restricted to the allowlisted senders
+    application.add_handler(
+        CommandHandler("halt", halt, filters=filters.User(user_id=list(_allowed_user_ids())))
+    )
 
     # Register the error handler
     application.add_error_handler(error_handler)  # type: ignore[arg-type]

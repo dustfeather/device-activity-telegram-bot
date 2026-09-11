@@ -82,6 +82,22 @@ This project requires Python 3.14. If you need to manage multiple Python version
    # Edit .env with your BOT_TOKEN and CHAT_ID
    ```
 
+   | Variable | Required | Description |
+   | --- | --- | --- |
+   | `BOT_TOKEN` | yes | Bot token from [@BotFather](https://t.me/BotFather). |
+   | `CHAT_ID` | yes | Where notifications are sent. From [@myidbot](https://t.me/myidbot). |
+   | `ALLOWED_USER_IDS` | no\* | Comma-separated Telegram user IDs permitted to issue `/halt`. |
+
+   `ALLOWED_USER_IDS` defaults to `CHAT_ID`, which in a private chat is your own
+   user ID — so a single-user setup needs nothing extra.
+
+   \* Required when `CHAT_ID` is negative. A negative `CHAT_ID` is a group or
+   channel rather than a user, so it cannot stand in for an owner's user ID;
+   the bot refuses to start rather than accept `/halt` from every group member.
+
+   > `CHAT_ID` controls where messages are **sent**. It does not restrict who may
+   > send commands — that is what `ALLOWED_USER_IDS` is for.
+
 ## Usage
 
 ```sh

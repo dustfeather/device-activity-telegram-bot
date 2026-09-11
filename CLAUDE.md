@@ -14,11 +14,12 @@ Different Telegram layers: `halt.py` uses `python-telegram-bot` `Application` fo
 
 - `bot_token`/`chat_id` regex-validated in BOTH `config.py` AND `telegram_client.py` (SSRF defense; token interpolated into API URL). Keep both in sync.
 - `halt()` regex-checks `DEVICENAME`, shuts down only when matches `platform.node()` (command-injection / wrong-host defense).
+- `halt()` rejects senders not in `settings.authorized_user_ids` BEFORE parsing args, and the handler is registered behind `filters.User` (unauthenticated-remote-shutdown defense). Both are needed: `error_handler` re-invokes `halt()` directly, bypassing handler filters. `CHAT_ID` is an outbound destination, never an inbound authorization.
 
 ## Conventions
 
 - Python 3.14+; `src/` layout — run as modules (`python -m src.send`).
-- Config from `.env`: `BOT_TOKEN`, `CHAT_ID`.
+- Config from `.env`: `BOT_TOKEN`, `CHAT_ID`, optional `ALLOWED_USER_IDS` (comma-separated; defaults to `CHAT_ID`, required when `CHAT_ID` is negative).
 - mypy strict; ruff line-length 100.
 - Rebase-merge only.
 

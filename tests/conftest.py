@@ -81,6 +81,16 @@ def mock_subprocess_run(monkeypatch):
     return mock_run
 
 
+@pytest.fixture(autouse=True)
+def authorize_test_user(monkeypatch):
+    """Allowlist the user that mock_telegram_update sends as.
+
+    Autouse so the existing happy-path tests keep exercising the command body.
+    Tests for the deny path override this with a different set of IDs.
+    """
+    monkeypatch.setattr("src.halt._allowed_user_ids", lambda: {12345})
+
+
 @pytest.fixture
 def mock_telegram_update():
     """Create a mock Telegram Update object."""

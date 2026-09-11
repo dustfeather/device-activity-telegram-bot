@@ -123,6 +123,66 @@ class TestHaltCommand:
         assert not mock_subprocess_run.called
 
 
+class TestHaltAuthorization:
+    """Test cases for sender authorization on the /halt command."""
+
+    @pytest.fixture
+    def deny_test_user(self, monkeypatch):
+        """Allowlist somebody other than the sender in mock_telegram_update."""
+        monkeypatch.setattr("src.halt._allowed_user_ids", lambda: {99999})
+
+    @pytest.mark.asyncio
+    async def test_halt_no_args_from_unauthorized_user_does_not_shut_down(
+        self, deny_test_user, mock_telegram_update, mock_telegram_context, mock_subprocess_run
+    ):
+        """The zero-arg branch shuts down immediately, so it must reject strangers."""
+        mock_telegram_context.args = []
+
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
+            await halt.halt(mock_telegram_update, mock_telegram_context)
+
+            # No acknowledgement — an unauthorized sender learns nothing
+            assert not mock_reply.called
+
+        assert not mock_subprocess_run.called
+
+    @pytest.mark.asyncio
+    async def test_halt_matching_device_from_unauthorized_user_does_not_shut_down(
+        self,
+        deny_test_user,
+        mock_telegram_update,
+        mock_telegram_context,
+        mock_subprocess_run,
+        mock_platform_node,
+    ):
+        """A correct device name must not substitute for being authorized."""
+        mock_telegram_context.args = ["test-device"]
+
+        with patch("telegram.Message.reply_text", new_callable=AsyncMock) as mock_reply:
+            await halt.halt(mock_telegram_update, mock_telegram_context)
+
+            assert not mock_reply.called
+
+        assert not mock_subprocess_run.called
+
+    @pytest.mark.asyncio
+    async def test_error_handler_retry_does_not_bypass_authorization(
+        self, deny_test_user, mock_telegram_update, mock_telegram_context, mock_subprocess_run
+    ):
+        """error_handler re-invokes halt() directly, bypassing handler filters.
+
+        That path must still be authorized, or a timeout turns into a free shutdown.
+        """
+        mock_telegram_context.args = []
+        mock_telegram_context.error = TimedOut()
+
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            with patch("telegram.Message.reply_text", new_callable=AsyncMock):
+                await halt.error_handler(mock_telegram_update, mock_telegram_context)
+
+        assert not mock_subprocess_run.called
+
+
 class TestErrorHandler:
     """Test cases for the error_handler() function."""
 
