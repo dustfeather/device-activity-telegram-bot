@@ -59,15 +59,15 @@ This project requires Python 3.14. If you need to manage multiple Python version
    cd device-activity-telegram-bot
    ```
 
-2. **Create a virtual environment**:
+2. **Create a virtual environment** (Python 3.14+):
    ```sh
-   python -m venv venv
+   python3.14 -m venv .venv
    
    # Windows
-   venv\Scripts\activate
+   .venv\Scripts\activate
    
    # Linux/macOS
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 3. **Install dependencies**:
