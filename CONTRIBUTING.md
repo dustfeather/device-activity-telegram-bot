@@ -98,10 +98,10 @@ This project requires Python 3.14. If you need to manage multiple Python version
    git config core.hooksPath .githooks
    ```
 
-   `.githooks/pre-commit` runs `ruff check`, `ruff format --check` and `pytest`
-   before every commit, mirroring CI. It picks the first interpreter that has
-   the dev dependencies installed — `$VIRTUAL_ENV`, then `.venv/`, `venv/`,
-   `python3`, `python` — and fails with instructions if none of them do.
+   `.githooks/pre-commit` runs `ruff check`, `ruff format --check`, `mypy` and
+   `pytest` before every commit, mirroring CI. It picks the first interpreter
+   that has the dev dependencies installed — `$VIRTUAL_ENV`, then `.venv/`,
+   `venv/`, `python3`, `python` — and fails with instructions if none of them do.
 
 ## Development Workflow
 
@@ -128,8 +128,8 @@ This project requires Python 3.14. If you need to manage multiple Python version
    # Format code
    ruff format src/ tests/
    
-   # Type check
-   mypy src/
+   # Type check (src/ and tests/ — scope comes from `files` in pyproject.toml)
+   mypy
    ```
 
 4. **Run tests**
@@ -166,14 +166,15 @@ This project uses modern Python tooling for code quality:
 - **Line endings**: LF (Unix-style)
 - **Maximum line length**: 100 characters
 - **Import order**: Standard library, third-party, local imports (enforced by ruff)
-- **Type hints**: Required for all functions and methods
+- **Type hints**: Required for all functions and methods, tests included
+  (fixtures and test functions need parameter types and `-> None`)
 - **Docstrings**: Required for all public functions and classes
 
 **Code Style Checklist:**
 - [ ] Code passes `ruff check`
 - [ ] Code is formatted with `ruff format`
 - [ ] Type hints added to all functions
-- [ ] Type checking passes with `mypy`
+- [ ] Type checking passes with `mypy` (strict, and it covers `tests/` too)
 - [ ] Docstrings added for functions and classes
 - [ ] Follow PEP 8 naming conventions
 

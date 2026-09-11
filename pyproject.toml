@@ -58,6 +58,9 @@ indent-style = "space"
 
 [tool.mypy]
 python_version = "3.14"
+# Checked by default so a bare `mypy` covers the tests too — they exercise
+# the same public signatures and drifted untyped once already (#59).
+files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 warn_return_any = true
 warn_unused_configs = true

@@ -1,14 +1,20 @@
 """Pytest configuration and shared fixtures."""
 
+import datetime as dtm
+from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from telegram import Chat, Message, Update, User
 from telegram.ext import CallbackContext
 
+# `Message.date` is typed as a required `datetime`. Real updates always carry
+# one; the tests only need it to be stable, so it is fixed rather than `now()`.
+TEST_MESSAGE_DATE = dtm.datetime(2026, 1, 1, tzinfo=dtm.UTC)
+
 
 @pytest.fixture
-def mock_env_vars(monkeypatch):
+def mock_env_vars(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
     """Mock environment variables for testing."""
     # Use valid Telegram bot token format: numeric:alphanumeric
     bot_token = "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
@@ -19,10 +25,8 @@ def mock_env_vars(monkeypatch):
 
 
 @pytest.fixture
-def mock_settings(monkeypatch, mock_env_vars):
+def mock_settings(monkeypatch: pytest.MonkeyPatch, mock_env_vars: dict[str, str]) -> MagicMock:
     """Mock the settings object in all modules that use it."""
-    from unittest.mock import MagicMock
-
     mock_settings_obj = MagicMock()
     mock_settings_obj.bot_token = mock_env_vars["BOT_TOKEN"]
     mock_settings_obj.chat_id = mock_env_vars["CHAT_ID"]
@@ -36,13 +40,13 @@ def mock_settings(monkeypatch, mock_env_vars):
 
 
 @pytest.fixture
-def mock_httpx_client(monkeypatch, mock_env_vars):
+def mock_httpx_client(monkeypatch: pytest.MonkeyPatch, mock_env_vars: dict[str, str]) -> MagicMock:
     """Mock httpx.AsyncClient for HTTP calls."""
     mock_response = Mock()
     mock_response.json.return_value = {"ok": True, "result": {"message_id": 1}}
     mock_response.raise_for_status = Mock()
 
-    async def mock_post(*args, **kwargs):
+    async def mock_post(*args: object, **kwargs: object) -> Mock:
         return mock_response
 
     mock_client = MagicMock()
@@ -56,7 +60,7 @@ def mock_httpx_client(monkeypatch, mock_env_vars):
 
 
 @pytest.fixture
-def mock_platform_node(monkeypatch):
+def mock_platform_node(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mock platform.node() to return a test device name."""
     monkeypatch.setattr("platform.node", lambda: "test-device")
     # Also patch halt.os_name directly
@@ -64,17 +68,17 @@ def mock_platform_node(monkeypatch):
 
 
 @pytest.fixture
-def mock_platform_system(monkeypatch):
+def mock_platform_system(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
     """Mock platform.system() to return a test OS."""
 
-    def _mock_system(os_name="Windows"):
+    def _mock_system(os_name: str = "Windows") -> None:
         monkeypatch.setattr("platform.system", lambda: os_name)
 
     return _mock_system
 
 
 @pytest.fixture
-def mock_subprocess_run(monkeypatch):
+def mock_subprocess_run(monkeypatch: pytest.MonkeyPatch) -> Mock:
     """Mock subprocess.run for shutdown commands."""
     mock_run = Mock()
     monkeypatch.setattr("subprocess.run", mock_run)
@@ -82,7 +86,7 @@ def mock_subprocess_run(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def authorize_test_user(monkeypatch):
+def authorize_test_user(monkeypatch: pytest.MonkeyPatch) -> None:
     """Allowlist the user that mock_telegram_update sends as.
 
     Autouse so the existing happy-path tests keep exercising the command body.
@@ -92,11 +96,11 @@ def authorize_test_user(monkeypatch):
 
 
 @pytest.fixture
-def mock_telegram_update():
+def mock_telegram_update() -> Update:
     """Create a mock Telegram Update object."""
     user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
     chat = Chat(id=67890, type="private")
-    message = Message(message_id=1, date=None, chat=chat, from_user=user, text="/halt")
+    message = Message(message_id=1, date=TEST_MESSAGE_DATE, chat=chat, from_user=user, text="/halt")
     update = Update(update_id=1, message=message)
     # Note: Cannot set reply_text directly on frozen Message objects
     # Tests should use patch.object() to mock reply_text when needed
@@ -104,7 +108,7 @@ def mock_telegram_update():
 
 
 @pytest.fixture
-def mock_telegram_context():
+def mock_telegram_context() -> MagicMock:
     """Create a mock Telegram CallbackContext object."""
     context = MagicMock(spec=CallbackContext)
     context.args = []
@@ -113,7 +117,7 @@ def mock_telegram_context():
 
 
 @pytest.fixture
-def mock_application_builder(monkeypatch):
+def mock_application_builder(monkeypatch: pytest.MonkeyPatch) -> tuple[MagicMock, MagicMock]:
     """Mock ApplicationBuilder for e2e tests."""
     mock_app = MagicMock()
     mock_builder = MagicMock()

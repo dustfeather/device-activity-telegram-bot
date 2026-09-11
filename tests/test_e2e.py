@@ -1,6 +1,6 @@
 """End-to-end tests for the halt.py bot functionality."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from telegram import Chat, Message, Update, User
@@ -8,6 +8,7 @@ from telegram.error import TimedOut
 from telegram.ext import Application, CallbackContext
 
 from src import halt
+from tests.conftest import TEST_MESSAGE_DATE
 
 
 class TestE2EHaltFlow:
@@ -15,13 +16,19 @@ class TestE2EHaltFlow:
 
     @pytest.mark.asyncio
     async def test_e2e_halt_no_args_flow(
-        self, mock_env_vars, mock_subprocess_run, mock_platform_node, mock_httpx_client
-    ):
+        self,
+        mock_env_vars: dict[str, str],
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+        mock_httpx_client: MagicMock,
+    ) -> None:
         """Test complete e2e flow: /halt command with no args."""
         # Create a real Update object
         user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
         chat = Chat(id=67890, type="private")
-        message = Message(message_id=1, date=None, chat=chat, from_user=user, text="/halt")
+        message = Message(
+            message_id=1, date=TEST_MESSAGE_DATE, chat=chat, from_user=user, text="/halt"
+        )
         update = Update(update_id=1, message=message)
 
         # Create a mock context
@@ -43,14 +50,22 @@ class TestE2EHaltFlow:
 
     @pytest.mark.asyncio
     async def test_e2e_halt_with_device_flow(
-        self, mock_env_vars, mock_subprocess_run, mock_platform_node, mock_httpx_client
-    ):
+        self,
+        mock_env_vars: dict[str, str],
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+        mock_httpx_client: MagicMock,
+    ) -> None:
         """Test complete e2e flow: /halt command with matching device name."""
         # Create a real Update object
         user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
         chat = Chat(id=67890, type="private")
         message = Message(
-            message_id=1, date=None, chat=chat, from_user=user, text="/halt test-device"
+            message_id=1,
+            date=TEST_MESSAGE_DATE,
+            chat=chat,
+            from_user=user,
+            text="/halt test-device",
         )
         update = Update(update_id=1, message=message)
 
@@ -73,14 +88,22 @@ class TestE2EHaltFlow:
 
     @pytest.mark.asyncio
     async def test_e2e_halt_with_wrong_device_flow(
-        self, mock_env_vars, mock_subprocess_run, mock_platform_node, mock_httpx_client
-    ):
+        self,
+        mock_env_vars: dict[str, str],
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+        mock_httpx_client: MagicMock,
+    ) -> None:
         """Test complete e2e flow: /halt command with non-matching device name."""
         # Create a real Update object
         user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
         chat = Chat(id=67890, type="private")
         message = Message(
-            message_id=1, date=None, chat=chat, from_user=user, text="/halt wrong-device"
+            message_id=1,
+            date=TEST_MESSAGE_DATE,
+            chat=chat,
+            from_user=user,
+            text="/halt wrong-device",
         )
         update = Update(update_id=1, message=message)
 
@@ -102,7 +125,9 @@ class TestE2EHaltFlow:
         assert not mock_subprocess_run.called
 
     @pytest.mark.asyncio
-    async def test_e2e_application_setup(self, mock_env_vars, mock_httpx_client, mock_settings):
+    async def test_e2e_application_setup(
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test e2e application setup and configuration."""
         with patch("src.halt.ApplicationBuilder") as mock_builder_class:
             mock_app = MagicMock(spec=Application)
@@ -130,13 +155,19 @@ class TestE2EHaltFlow:
 
     @pytest.mark.asyncio
     async def test_e2e_error_retry_flow(
-        self, mock_env_vars, mock_subprocess_run, mock_platform_node, mock_httpx_client
-    ):
+        self,
+        mock_env_vars: dict[str, str],
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+        mock_httpx_client: MagicMock,
+    ) -> None:
         """Test e2e error handling and retry flow."""
         # Create a real Update object
         user = User(id=12345, first_name="Test", is_bot=False, username="testuser")
         chat = Chat(id=67890, type="private")
-        message = Message(message_id=1, date=None, chat=chat, from_user=user, text="/halt")
+        message = Message(
+            message_id=1, date=TEST_MESSAGE_DATE, chat=chat, from_user=user, text="/halt"
+        )
         update = Update(update_id=1, message=message)
 
         # Create a mock context with TimedOut error
@@ -157,7 +188,9 @@ class TestE2EHaltFlow:
                 assert mock_reply.called
 
     @pytest.mark.asyncio
-    async def test_e2e_startup_message(self, mock_env_vars, mock_httpx_client, mock_platform_node):
+    async def test_e2e_startup_message(
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock, mock_platform_node: None
+    ) -> None:
         """Test e2e startup message sending."""
         # Test the startup_notification function
         await halt.startup_notification()

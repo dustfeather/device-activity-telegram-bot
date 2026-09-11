@@ -1,6 +1,6 @@
 """Unit tests for send.py module."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -12,7 +12,9 @@ class TestSendMessage:
     """Test cases for the send_message() function."""
 
     @pytest.mark.asyncio
-    async def test_send_message_success(self, mock_env_vars, mock_httpx_client, mock_settings):
+    async def test_send_message_success(
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test successful message sending."""
         message = "Test message"
         result = await send_message(message)
@@ -33,7 +35,9 @@ class TestSendMessage:
         assert result == {"ok": True, "result": {"message_id": 1}}
 
     @pytest.mark.asyncio
-    async def test_send_message_with_empty_message(self, mock_env_vars, mock_httpx_client):
+    async def test_send_message_with_empty_message(
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock
+    ) -> None:
         """Test sending an empty message."""
         message = ""
         await send_message(message)
@@ -44,8 +48,8 @@ class TestSendMessage:
 
     @pytest.mark.asyncio
     async def test_send_message_uses_env_vars(
-        self, mock_env_vars, mock_httpx_client, mock_settings
-    ):
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test that send_message() correctly uses environment variables."""
         message = "Test"
         await send_message(message)
@@ -56,7 +60,9 @@ class TestSendMessage:
         assert call_args[1]["data"]["chat_id"] == mock_env_vars["CHAT_ID"]
 
     @pytest.mark.asyncio
-    async def test_send_message_http_error(self, mock_env_vars, mock_httpx_client):
+    async def test_send_message_http_error(
+        self, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock
+    ) -> None:
         """Test handling of HTTP errors."""
         import httpx
 
@@ -72,7 +78,9 @@ class TestSendMessage:
 
     @pytest.mark.asyncio
     @patch("platform.node")
-    async def test_main_execution(self, mock_node, mock_env_vars, mock_httpx_client):
+    async def test_main_execution(
+        self, mock_node: MagicMock, mock_env_vars: dict[str, str], mock_httpx_client: MagicMock
+    ) -> None:
         """Test the main execution block of send.py."""
         mock_node.return_value = "test-device"
 
@@ -90,7 +98,9 @@ class TestTelegramClientValidation:
     """Test cases for telegram_client.py validation logic."""
 
     @pytest.mark.asyncio
-    async def test_invalid_bot_token_format_missing_colon(self, mock_httpx_client):
+    async def test_invalid_bot_token_format_missing_colon(
+        self, mock_httpx_client: MagicMock
+    ) -> None:
         """Test that invalid bot token format (missing colon) raises ValueError."""
         from unittest.mock import MagicMock
 
@@ -103,7 +113,9 @@ class TestTelegramClientValidation:
                 await send_message("Test message")
 
     @pytest.mark.asyncio
-    async def test_invalid_bot_token_format_invalid_chars(self, mock_httpx_client):
+    async def test_invalid_bot_token_format_invalid_chars(
+        self, mock_httpx_client: MagicMock
+    ) -> None:
         """Test that invalid bot token format (invalid characters) raises ValueError."""
         from unittest.mock import MagicMock
 
@@ -116,7 +128,7 @@ class TestTelegramClientValidation:
                 await send_message("Test message")
 
     @pytest.mark.asyncio
-    async def test_invalid_bot_token_format_no_numbers(self, mock_httpx_client):
+    async def test_invalid_bot_token_format_no_numbers(self, mock_httpx_client: MagicMock) -> None:
         """Test that invalid bot token format (no numbers before colon) raises ValueError."""
         from unittest.mock import MagicMock
 
@@ -129,7 +141,7 @@ class TestTelegramClientValidation:
                 await send_message("Test message")
 
     @pytest.mark.asyncio
-    async def test_invalid_chat_id_format_non_numeric(self, mock_httpx_client):
+    async def test_invalid_chat_id_format_non_numeric(self, mock_httpx_client: MagicMock) -> None:
         """Test that invalid chat_id format (non-numeric) raises ValueError."""
         from unittest.mock import MagicMock
 
@@ -142,7 +154,7 @@ class TestTelegramClientValidation:
                 await send_message("Test message")
 
     @pytest.mark.asyncio
-    async def test_invalid_chat_id_format_with_letters(self, mock_httpx_client):
+    async def test_invalid_chat_id_format_with_letters(self, mock_httpx_client: MagicMock) -> None:
         """Test that invalid chat_id format (contains letters) raises ValueError."""
         from unittest.mock import MagicMock
 
@@ -155,7 +167,7 @@ class TestTelegramClientValidation:
                 await send_message("Test message")
 
     @pytest.mark.asyncio
-    async def test_valid_negative_chat_id(self, mock_httpx_client):
+    async def test_valid_negative_chat_id(self, mock_httpx_client: MagicMock) -> None:
         """Test that negative chat_id (for groups) is valid."""
         from unittest.mock import MagicMock
 
@@ -168,7 +180,7 @@ class TestTelegramClientValidation:
             assert mock_httpx_client.post.called
 
     @pytest.mark.asyncio
-    async def test_token_url_encoding(self, mock_httpx_client):
+    async def test_token_url_encoding(self, mock_httpx_client: MagicMock) -> None:
         """Test that token is properly URL-encoded while preserving colon."""
         from unittest.mock import MagicMock
 

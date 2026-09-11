@@ -27,6 +27,9 @@ jobs:
     with:
       runner: arc-df-device-activity-telegram-bot
       run-mypy: true
+      # The shared workflow defaults mypy-paths to "src/", which left the test
+      # suite unchecked while ruff and pytest both covered it (#59).
+      mypy-paths: "src/ tests/"
 
   review:
     if: github.event_name == 'pull_request'
