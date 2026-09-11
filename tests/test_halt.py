@@ -1,9 +1,11 @@
 """Unit tests for halt.py module."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import Callable
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpcore
 import pytest
+from telegram import Update
 from telegram.error import TimedOut
 
 from src import halt
@@ -12,7 +14,9 @@ from src import halt
 class TestShutdownMachine:
     """Test cases for shutdown_machine() function."""
 
-    def test_shutdown_windows(self, mock_subprocess_run, mock_platform_system):
+    def test_shutdown_windows(
+        self, mock_subprocess_run: Mock, mock_platform_system: Callable[..., None]
+    ) -> None:
         """Test shutdown command on Windows."""
         mock_platform_system("Windows")
 
@@ -22,7 +26,9 @@ class TestShutdownMachine:
         call_args = mock_subprocess_run.call_args
         assert call_args[0][0] == ["shutdown", "/s", "/f", "/t", "0"]
 
-    def test_shutdown_linux(self, mock_subprocess_run, mock_platform_system):
+    def test_shutdown_linux(
+        self, mock_subprocess_run: Mock, mock_platform_system: Callable[..., None]
+    ) -> None:
         """Test shutdown command on Linux."""
         mock_platform_system("Linux")
 
@@ -32,7 +38,9 @@ class TestShutdownMachine:
         call_args = mock_subprocess_run.call_args
         assert call_args[0][0] == ["sudo", "shutdown", "now"]
 
-    def test_shutdown_darwin(self, mock_subprocess_run, mock_platform_system):
+    def test_shutdown_darwin(
+        self, mock_subprocess_run: Mock, mock_platform_system: Callable[..., None]
+    ) -> None:
         """Test shutdown command on macOS (Darwin)."""
         mock_platform_system("Darwin")
 
@@ -48,8 +56,12 @@ class TestHaltCommand:
 
     @pytest.mark.asyncio
     async def test_halt_no_args(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """Test /halt command with no arguments."""
         mock_telegram_context.args = []
 
@@ -67,8 +79,12 @@ class TestHaltCommand:
 
     @pytest.mark.asyncio
     async def test_halt_with_matching_device(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """Test /halt command with matching device name."""
         mock_telegram_context.args = ["test-device"]
 
@@ -86,8 +102,12 @@ class TestHaltCommand:
 
     @pytest.mark.asyncio
     async def test_halt_with_non_matching_device(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """Test /halt command with non-matching device name."""
         mock_telegram_context.args = ["other-device"]
 
@@ -105,8 +125,11 @@ class TestHaltCommand:
 
     @pytest.mark.asyncio
     async def test_halt_with_multiple_args(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+    ) -> None:
         """Test /halt command with multiple arguments (invalid usage)."""
         mock_telegram_context.args = ["arg1", "arg2"]
 
@@ -127,14 +150,18 @@ class TestHaltAuthorization:
     """Test cases for sender authorization on the /halt command."""
 
     @pytest.fixture
-    def deny_test_user(self, monkeypatch):
+    def deny_test_user(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Allowlist somebody other than the sender in mock_telegram_update."""
         monkeypatch.setattr("src.halt._allowed_user_ids", lambda: {99999})
 
     @pytest.mark.asyncio
     async def test_halt_no_args_from_unauthorized_user_does_not_shut_down(
-        self, deny_test_user, mock_telegram_update, mock_telegram_context, mock_subprocess_run
-    ):
+        self,
+        deny_test_user: None,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+    ) -> None:
         """The zero-arg branch shuts down immediately, so it must reject strangers."""
         mock_telegram_context.args = []
 
@@ -149,12 +176,12 @@ class TestHaltAuthorization:
     @pytest.mark.asyncio
     async def test_halt_matching_device_from_unauthorized_user_does_not_shut_down(
         self,
-        deny_test_user,
-        mock_telegram_update,
-        mock_telegram_context,
-        mock_subprocess_run,
-        mock_platform_node,
-    ):
+        deny_test_user: None,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """A correct device name must not substitute for being authorized."""
         mock_telegram_context.args = ["test-device"]
 
@@ -167,8 +194,12 @@ class TestHaltAuthorization:
 
     @pytest.mark.asyncio
     async def test_error_handler_retry_does_not_bypass_authorization(
-        self, deny_test_user, mock_telegram_update, mock_telegram_context, mock_subprocess_run
-    ):
+        self,
+        deny_test_user: None,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+    ) -> None:
         """error_handler re-invokes halt() directly, bypassing handler filters.
 
         That path must still be authorized, or a timeout turns into a free shutdown.
@@ -188,8 +219,12 @@ class TestErrorHandler:
 
     @pytest.mark.asyncio
     async def test_error_handler_timed_out(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """Test error handler with TimedOut exception."""
         mock_telegram_context.error = TimedOut("Connection timeout")
         mock_telegram_context.args = []
@@ -207,8 +242,12 @@ class TestErrorHandler:
 
     @pytest.mark.asyncio
     async def test_error_handler_connect_timeout(
-        self, mock_telegram_update, mock_telegram_context, mock_subprocess_run, mock_platform_node
-    ):
+        self,
+        mock_telegram_update: Update,
+        mock_telegram_context: MagicMock,
+        mock_subprocess_run: Mock,
+        mock_platform_node: None,
+    ) -> None:
         """Test error handler with httpcore.ConnectTimeout exception."""
         mock_telegram_context.error = httpcore.ConnectTimeout("Connection timeout")
         mock_telegram_context.args = []
@@ -225,7 +264,9 @@ class TestErrorHandler:
                 assert mock_reply.called
 
     @pytest.mark.asyncio
-    async def test_error_handler_other_exception(self, mock_telegram_update, mock_telegram_context):
+    async def test_error_handler_other_exception(
+        self, mock_telegram_update: Update, mock_telegram_context: MagicMock
+    ) -> None:
         """Test error handler with other exception types."""
         mock_telegram_context.error = ValueError("Some other error")
 
@@ -238,7 +279,9 @@ class TestMainFunction:
     """Test cases for the main() function."""
 
     @patch("src.halt.ApplicationBuilder")
-    def test_main_creates_application(self, mock_builder, mock_env_vars, mock_settings):
+    def test_main_creates_application(
+        self, mock_builder: MagicMock, mock_env_vars: dict[str, str], mock_settings: MagicMock
+    ) -> None:
         """Test that main() creates and configures the application."""
         mock_app = MagicMock()
         mock_builder_instance = MagicMock()
@@ -261,7 +304,9 @@ class TestMainFunction:
         mock_app.run_polling.assert_called_once()
 
     @patch("src.halt.ApplicationBuilder")
-    def test_main_registers_handlers(self, mock_builder, mock_env_vars):
+    def test_main_registers_handlers(
+        self, mock_builder: MagicMock, mock_env_vars: dict[str, str]
+    ) -> None:
         """Test that main() registers the correct handlers."""
         mock_app = MagicMock()
         mock_builder_instance = MagicMock()

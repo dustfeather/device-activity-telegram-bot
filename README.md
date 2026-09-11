@@ -129,7 +129,7 @@ Or add manually to `taskschd.msc`:
 ```sh
 ruff check src/ tests/      # Lint
 ruff format src/ tests/     # Format
-mypy src/                   # Type check
+mypy                        # Type check (src + tests)
 pytest -v                   # Test
 ```
 

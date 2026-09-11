@@ -1,5 +1,5 @@
 #!/bin/sh
-# Pre-commit gate: ruff lint + ruff format + pytest. Mirrors CI
+# Pre-commit gate: ruff lint + ruff format + mypy + pytest. Mirrors CI
 # (shared-workflows python-test.yml).
 set -eu
 cd "$(git rev-parse --show-toplevel)"
@@ -18,7 +18,7 @@ for candidate in \
     "$(command -v python || true)"
 do
     [ -n "$candidate" ] && [ -x "$candidate" ] || continue
-    "$candidate" -c "import ruff, pytest" >/dev/null 2>&1 || continue
+    "$candidate" -c "import ruff, pytest, mypy" >/dev/null 2>&1 || continue
     PY="$candidate"
     break
 done
@@ -35,5 +35,7 @@ fi
 echo "[pre-commit] interpreter: $PY"
 echo "[pre-commit] ruff check…";  "$PY" -m ruff check .
 echo "[pre-commit] ruff format…"; "$PY" -m ruff format --check .
+# No path argument: `files` in pyproject.toml decides the scope (src + tests).
+echo "[pre-commit] mypy…";        "$PY" -m mypy
 echo "[pre-commit] pytest…";      "$PY" -m pytest -q
 echo "[pre-commit] OK"
