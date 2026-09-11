@@ -1,13 +1,39 @@
 #!/bin/sh
-# Pre-commit gate: ruff lint + pytest. Mirrors CI
+# Pre-commit gate: ruff lint + ruff format + pytest. Mirrors CI
 # (shared-workflows python-test.yml).
-#
-# NOTE: `ruff format --check` is intentionally NOT run here. Some
-# pre-existing files (setup.py, src/halt.py) are not ruff-formatted, so a
-# format gate would block all commits on unrelated legacy code. Re-add the
-# `ruff format --check .` line once the tree is fully formatted.
 set -eu
 cd "$(git rev-parse --show-toplevel)"
-echo "[pre-commit] ruff check…"; python -m ruff check .
-echo "[pre-commit] pytest…";     python -m pytest -q
+
+# Resolve an interpreter that actually has the dev dependencies installed.
+# `python` (unsuffixed) is absent on many dev boxes, and under WSL it can
+# resolve to a Windows pyenv shim that dies with `/bin/sh^M: bad interpreter`.
+# A stale venv/ may also exist without pytest. So candidates are probed for the
+# tools this hook runs rather than assumed to work.
+PY=""
+for candidate in \
+    "${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/python}" \
+    .venv/bin/python \
+    venv/bin/python \
+    "$(command -v python3 || true)" \
+    "$(command -v python || true)"
+do
+    [ -n "$candidate" ] && [ -x "$candidate" ] || continue
+    "$candidate" -c "import ruff, pytest" >/dev/null 2>&1 || continue
+    PY="$candidate"
+    break
+done
+
+if [ -z "$PY" ]; then
+    echo "[pre-commit] no Python interpreter with the dev dependencies was found." >&2
+    echo "[pre-commit] tried: \$VIRTUAL_ENV, .venv/, venv/, python3, python" >&2
+    echo "[pre-commit] create one, then retry the commit:" >&2
+    echo "[pre-commit]   uv venv --python 3.14 .venv" >&2
+    echo "[pre-commit]   uv pip install --python .venv -r requirements.txt -r requirements-dev.txt" >&2
+    exit 1
+fi
+
+echo "[pre-commit] interpreter: $PY"
+echo "[pre-commit] ruff check…";  "$PY" -m ruff check .
+echo "[pre-commit] ruff format…"; "$PY" -m ruff format --check .
+echo "[pre-commit] pytest…";      "$PY" -m pytest -q
 echo "[pre-commit] OK"

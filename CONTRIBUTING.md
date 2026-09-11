@@ -63,14 +63,19 @@ This project requires Python 3.14. If you need to manage multiple Python version
    ```
 
 2. **Create a virtual environment**
+
+   The project requires Python 3.14+, so build the environment with an
+   interpreter of that version. A `venv/` left over from an older Python will
+   not work.
+
    ```sh
-   python -m venv venv
+   python3.14 -m venv .venv
    
    # On Windows
-   venv\Scripts\activate
+   .venv\Scripts\activate
    
    # On Linux/macOS
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 3. **Install dependencies**
@@ -87,6 +92,16 @@ This project requires Python 3.14. If you need to manage multiple Python version
    cp .env.example .env
    # Edit .env with your BOT_TOKEN and CHAT_ID
    ```
+
+5. **Enable the git hooks**
+   ```sh
+   git config core.hooksPath .githooks
+   ```
+
+   `.githooks/pre-commit` runs `ruff check`, `ruff format --check` and `pytest`
+   before every commit, mirroring CI. It picks the first interpreter that has
+   the dev dependencies installed — `$VIRTUAL_ENV`, then `.venv/`, `venv/`,
+   `python3`, `python` — and fails with instructions if none of them do.
 
 ## Development Workflow
 
@@ -168,6 +183,7 @@ All functions and methods must include type hints:
 
 ```python
 from typing import Any
+
 
 async def send_message(message: str) -> dict[str, Any]:
     """Send a message via Telegram Bot API."""
