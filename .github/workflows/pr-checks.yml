@@ -25,6 +25,7 @@ jobs:
       contents: read
     uses: dustfeather/shared-workflows/.github/workflows/python-test.yml@v8
     with:
+      runner: arc-df-device-activity-telegram-bot
       run-mypy: true
       # The shared workflow defaults mypy-paths to "src/", which left the test
       # suite unchecked while ruff and pytest both covered it (#59).
@@ -42,4 +43,6 @@ jobs:
       issues: read
       id-token: write
     uses: dustfeather/shared-workflows/.github/workflows/claude-code-review.yml@v8
+    with:
+      runner: arc-df-device-activity-telegram-bot
     secrets: inherit
